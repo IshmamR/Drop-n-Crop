@@ -20,53 +20,40 @@ const getFileExtensionOfBase64 = (base64Data) => {
 const image64ToCanvasRef = (canvasRef, image64, pixelCrop, imgRef) => {
 	// console.log(canvasRef, image64, pixelCrop)
 	const canvas = canvasRef;
-	canvas.width = pixelCrop.width * imgRef.scaleX;
-	canvas.height = pixelCrop.height * imgRef.scaleY;
+	const scaledWidth = pixelCrop.width*imgRef.scaleX;
+	const scaledHeight = pixelCrop.height*imgRef.scaleY;
+	canvas.width = (scaledHeight===scaledWidth && pixelCrop.width < 150) ? scaledWidth : pixelCrop.width;
+	canvas.height = (scaledHeight===scaledWidth && pixelCrop.height < 150) ? scaledHeight : pixelCrop.height;
 	const ctx = canvas.getContext('2d');
 	const image = new Image();
 	image.src = image64;
 
-	const x = canvas.width<'200'? pixelCrop.width * imgRef.scaleX : pixelCrop.width;
-	const y = canvas.height<'200'? pixelCrop.height * imgRef.scaleY : pixelCrop.height;
+	const x = canvas.width;
+	const y = canvas.height;
+
 	image.onload = () => {
 		ctx.drawImage(
 			image,
 			pixelCrop.x * imgRef.scaleX, 
 			pixelCrop.y * imgRef.scaleY,
-			pixelCrop.width * imgRef.scaleX, 
-			pixelCrop.height * imgRef.scaleY,
+			scaledWidth, scaledHeight,
 			0, 0,
+			// pixelCrop.width, pixelCrop.height
 			x, y
 		)
 	}
 	// console.log(canvasRef, pixelCrop);
 }
 
-export { base64StringToFile, getFileExtensionOfBase64, image64ToCanvasRef };
+// Download Base64 File
+const downloadBase64File = (base64Data, fileName) => {
+	var a = document.createElement('a');
+	a.href = base64Data;
+	a.download = fileName;
+	a.style.display = 'none';
+	document.body.appendChild(a);
+	a.click();
+	document.body.removeChild(a);
+}
 
-// export function image64toCanvasRef (canvasRef, image64, pixelCrop, imgRef) {
-//   const canvas = canvasRef // document.createElement('canvas');
-//   console.log(imgRef)
-//   canvas.width = pixelCrop.width
-//   canvas.height = pixelCrop.height
-// 
-//   const scaleX = imgRef.naturalWidth / imgRef.width;
-//   const scaleY = imgRef.naturalHeight / imgRef.height;
-//   
-//   const ctx = canvas.getContext('2d')
-//   const image = new Image()
-//   image.src = image64
-//   image.onload = function () {
-//     ctx.drawImage(
-//       image,
-//       pixelCrop.x  * scaleX,
-//       pixelCrop.y * scaleY,
-//       pixelCrop.width  * scaleX,
-//       pixelCrop.height * scaleY,
-//       0,
-//       0,
-//       pixelCrop.width,
-//       pixelCrop.height
-//     )
-//   }
-// }
+export { base64StringToFile, getFileExtensionOfBase64, image64ToCanvasRef, downloadBase64File };
